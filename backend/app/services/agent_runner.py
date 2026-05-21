@@ -5,7 +5,8 @@ Tools customizadas Python ficam em `.claude/agents/<nome>/scripts/` e devem cham
 a API REST local (httpx) — agents **nunca** tocam o `.db` diretamente.
 
 Esta classe é apenas a fundação: a integração real com o SDK é finalizada quando
-o primeiro agent for criado, junto da feature do Slack `/loop`.
+o primeiro agent real for criado (a ponte com Slack hoje é uma **skill** rodada
+pelo `/loop` do Claude Code, não um agent — ver `.claude/skills/slack-listener`).
 """
 
 from __future__ import annotations
@@ -46,8 +47,8 @@ class AgentDefinition:
 class AgentRunner:
     """Carrega definições de agent e (futuramente) executa via `claude-agent-sdk`.
 
-    A execução concreta é plugada quando o primeiro agent real for criado, junto
-    da feature do Slack `/loop`. Para a base, garantimos parsing e descoberta.
+    A execução concreta é plugada quando o primeiro agent real for criado.
+    Para a base, garantimos parsing e descoberta.
     """
 
     def __init__(self) -> None:
@@ -97,8 +98,8 @@ class AgentRunner:
 
     async def run(self, agent_name: str, message: str, *, context: dict[str, Any] | None = None) -> Any:
         """Execução real via `claude-agent-sdk`. Implementação será plugada
-        junto da feature do Slack `/loop`. Mantemos o método aqui para que o
-        contrato fique visível desde a base."""
+        quando o primeiro agent real for criado. Mantemos o método aqui para
+        que o contrato fique visível desde a base."""
         raise NotImplementedError(
-            "AgentRunner.run será implementado junto da feature Slack /loop"
+            "AgentRunner.run será implementado junto do primeiro agent real"
         )
