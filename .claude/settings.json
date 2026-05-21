@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(uvicorn:*)",
+      "Bash(npm:*)",
+      "Bash(pytest:*)",
+      "mcp__plugin_slack_slack__*",
+      "mcp__atlassian__*",
+      "mcp__google-workspace__*",
+      "mcp__glean_default__*"
+    ],
+    "deny": []
+  }
+}

@@ -1,3 +1,45 @@
+# Existing project notes (not tracked)
 CHALLENGE.md
 NOTES.md
 PLAN.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Runtime state
+.run/
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+!data/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Env
+.env
+.env.local
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+config.yaml
+MEMORY.md
+ARCHITECTURE.md
+CLAUDE.md

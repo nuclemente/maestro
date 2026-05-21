@@ -1,0 +1,47 @@
+[project]
+name = "maestro-backend"
+version = "0.1.0"
+description = "Maestro — backend (FastAPI) para o assistente local-first de Engineering Management"
+requires-python = ">=3.13"
+dependencies = [
+    # fastapi >= 0.115.5 já traz starlette >= 0.47.2 (mitiga CVE-2025-54121 DoS multipart)
+    "fastapi>=0.115.5,<0.117",
+    "uvicorn[standard]>=0.32,<0.50",
+    "sqlalchemy>=2.0,<2.1",
+    "alembic>=1.13,<2.0",
+    "pydantic>=2.9,<3.0",
+    "pydantic-settings>=2.6,<3.0",
+    "structlog>=24.4,<26.0",
+    "httpx>=0.27,<0.29",
+    # pyyaml >= 6.0 não expõe FullLoader RCE (CVE-2020-14343 family)
+    "pyyaml>=6.0.2,<7.0",
+    # python-multipart >= 0.0.26 mitiga CVE-2026-40347 (DoS preamble/epilogue)
+    # e GHSA-pp6c-gr5w-3c5g (DoS unbounded headers)
+    "python-multipart>=0.0.26,<0.1",
+    # claude-agent-sdk publicado pela Anthropic — usa releases 0.2.x
+    "claude-agent-sdk>=0.2,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "ruff>=0.7,<1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"

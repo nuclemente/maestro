@@ -1,0 +1,31 @@
+/**
+ * Nu Sans @font-face.
+ *
+ * Os arquivos `.woff2` devem ficar em `frontend/public/fonts/` e NÃO são
+ * versionados (licença interna). Caso ausentes, o fallback system-ui é aplicado
+ * automaticamente.
+ */
+
+@font-face {
+  font-family: 'Nu Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/NuSans-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nu Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/NuSans-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nu Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/NuSans-Bold.woff2') format('woff2');
+}
