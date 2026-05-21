@@ -1,0 +1,51 @@
+#!/usr/bin/env zsh
+# Uso: ./auto-commit [branch-de-destino]
+#   - branch: opcional; default = main
+#   A mensagem do commit é gerada automaticamente pelo Claude CLI a partir do diff staged.
+
+set -euo pipefail
+
+local target_branch="${1:-main}"
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  print -u2 "Erro: diretório atual não é um repositório git."
+  exit 1
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+  print -u2 "Erro: 'claude' CLI não encontrado no PATH."
+  exit 1
+fi
+
+git add -A
+
+if git diff --cached --quiet; then
+  print -u2 "Nada para commitar."
+  exit 0
+fi
+
+local diff_content
+diff_content="$(git diff --cached)"
+
+local prompt="Gere uma mensagem de commit em português, no formato Conventional Commits (ex.: 'feat:', 'fix:', 'chore:', 'docs:', 'refactor:'), descrevendo de forma concisa as alterações abaixo.
+Regras:
+- Apenas UMA linha (subject), máximo 72 caracteres.
+- Sem aspas, sem crases, sem markdown, sem prefixo/sufixo explicativo.
+- Responda SOMENTE com a mensagem final.
+
+DIFF:
+${diff_content}"
+
+local message
+message="$(print -r -- "$prompt" | claude -p 2>/dev/null | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | head -n 1)"
+
+if [[ -z "$message" ]]; then
+  print -u2 "Erro: falha ao gerar mensagem de commit via Claude."
+  exit 1
+fi
+
+print "Mensagem gerada: $message"
+
+git commit -m "$message"
+
+git push -u origin "HEAD:${target_branch}"
