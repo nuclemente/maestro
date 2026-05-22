@@ -75,7 +75,7 @@ export default function PeopleDrafts() {
       {loading ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {[0, 1].map((i) => (
-            <div key={i} className="h-48 animate-pulse rounded-2xl border border-neutral-200 bg-neutral-0" />
+            <div key={i} className="h-48 animate-pulse rounded-lg border border-neutral-200 bg-neutral-0" />
           ))}
         </div>
       ) : drafts.length === 0 ? (

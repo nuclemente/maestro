@@ -10,7 +10,7 @@ interface Props {
 
 export default function EmptyState({ title, description, action, icon }: Props) {
   return (
-    <div className="maestro-fade-in flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-0 px-6 py-16 text-center">
+    <div className="maestro-fade-in flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-200 bg-neutral-0 px-6 py-16 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-primary-500">
         {icon ?? <Users size={26} strokeWidth={1.5} />}
       </div>

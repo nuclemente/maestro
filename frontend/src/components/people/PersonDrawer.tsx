@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowLeft, MoreHorizontal, Pencil, Trash2, X } from 'lucide-react';
+import { ArrowLeft, MoreHorizontal, Trash2, X } from 'lucide-react';
 import Button from '../ui/Button';
-import PersonDetail from './PersonDetail';
 import PersonForm from './PersonForm';
 import type { Person, PersonInput } from '../../types/person';
 
-export type DrawerMode = 'view' | 'edit' | 'create' | 'edit-draft';
+export type DrawerMode = 'edit' | 'create' | 'edit-draft';
 
 interface Props {
   open: boolean;
@@ -16,14 +15,12 @@ interface Props {
   hasHistory?: boolean;
   onClose: () => void;
   onBack?: () => void;
-  onRequestEdit?: () => void;
   onRequestRemove?: () => void;
   onSubmit: (input: PersonInput) => Promise<void>;
 }
 
 const TITLE_BY_MODE: Record<DrawerMode, (name?: string) => string> = {
-  view:         (name) => name ?? '',
-  edit:         (name) => `Editar ${name ?? ''}`.trim(),
+  edit:         (name) => name ?? '',
   create:       () => 'Nova pessoa',
   'edit-draft': () => 'Editar proposta',
 };
@@ -36,11 +33,10 @@ export default function PersonDrawer({
   hasHistory,
   onClose,
   onBack,
-  onRequestEdit,
   onRequestRemove,
   onSubmit,
 }: Props) {
-  const [animating, setAnimating] = useState(false);
+  const [, setAnimating] = useState(false);
   const [closing, setClosing] = useState(false);
   const [paneClass, setPaneClass] = useState('maestro-pane-in');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,7 +47,6 @@ export default function PersonDrawer({
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  // Foco inicial ao abrir.
   useEffect(() => {
     if (open && !closing) {
       const t = setTimeout(() => closeBtnRef.current?.focus(), 60);
@@ -59,7 +54,6 @@ export default function PersonDrawer({
     }
   }, [open, closing]);
 
-  // Cross-fade entre modos.
   useEffect(() => {
     if (!open) return;
     if (previousModeRef.current === mode) return;
@@ -71,10 +65,9 @@ export default function PersonDrawer({
     return () => clearTimeout(t);
   }, [mode, open]);
 
-  // Fechar com animação.
   const closeWithAnim = useCallback(() => {
     if (closing) return;
-    if ((mode === 'edit' || mode === 'create' || mode === 'edit-draft') && dirty) {
+    if (dirty) {
       const ok = window.confirm('Descartar alterações não salvas?');
       if (!ok) return;
     }
@@ -83,9 +76,19 @@ export default function PersonDrawer({
       setClosing(false);
       onClose();
     }, 240);
-  }, [closing, dirty, mode, onClose]);
+  }, [closing, dirty, onClose]);
 
-  // Esc fecha; Cmd/Ctrl+S salva (em modos de form).
+  const handleSubmit = useCallback(async () => {
+    if (!submitFnRef.current) return;
+    setSubmitting(true);
+    try {
+      await submitFnRef.current();
+    } finally {
+      setSubmitting(false);
+    }
+  }, []);
+
+  // Esc fecha; Cmd/Ctrl+S salva.
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -93,18 +96,14 @@ export default function PersonDrawer({
         e.preventDefault();
         closeWithAnim();
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-        if (mode === 'edit' || mode === 'create' || mode === 'edit-draft') {
-          e.preventDefault();
-          void handleSubmit();
-        }
+        e.preventDefault();
+        void handleSubmit();
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, mode, closeWithAnim]);
+  }, [open, closeWithAnim, handleSubmit]);
 
-  // Fecha menu ⋯ ao clicar fora.
   useEffect(() => {
     if (!menuOpen) return;
     function onClick(e: MouseEvent) {
@@ -116,23 +115,13 @@ export default function PersonDrawer({
     return () => document.removeEventListener('mousedown', onClick);
   }, [menuOpen]);
 
-  async function handleSubmit() {
-    if (!submitFnRef.current) return;
-    setSubmitting(true);
-    try {
-      await submitFnRef.current();
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
   if (!open && !closing) return null;
 
-  const isFormMode = mode === 'edit' || mode === 'create' || mode === 'edit-draft';
   const title = TITLE_BY_MODE[mode](person?.name);
-  const showBack = mode !== 'view' || hasHistory;
+  const showBack = hasHistory;
   const submitLabel = mode === 'create' ? 'Cadastrar' : 'Salvar';
   const submittingLabel = mode === 'create' ? 'Cadastrando…' : 'Salvando…';
+  const canRemove = mode === 'edit' && Boolean(person) && Boolean(onRequestRemove);
 
   return (
     <>
@@ -170,72 +159,58 @@ export default function PersonDrawer({
             >
               {showBack ? <ArrowLeft size={18} /> : <X size={18} />}
             </button>
-            <span className="truncate text-sm font-medium text-neutral-700">
-              {title || (mode === 'view' && person ? person.name : '')}
-            </span>
+            <span className="truncate text-sm font-medium text-neutral-700">{title}</span>
           </div>
 
           <div className="flex items-center gap-2">
-            {mode === 'view' && person && (
-              <>
-                <Button size="sm" variant="primary" onClick={onRequestEdit}>
-                  <Pencil size={14} />
-                  Editar
-                </Button>
-                <div className="relative" data-menu-anchor>
-                  <button
-                    type="button"
-                    aria-haspopup="menu"
-                    aria-expanded={menuOpen}
-                    onClick={() => setMenuOpen((v) => !v)}
-                    className="flex h-9 w-9 items-center justify-center rounded-md text-neutral-600 transition hover:bg-neutral-100 active:scale-95"
-                  >
-                    <MoreHorizontal size={18} />
-                  </button>
-                  {menuOpen && (
-                    <div className="maestro-fade-in absolute right-0 top-11 z-20 w-44 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-0 shadow-lg">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMenuOpen(false);
-                          onRequestRemove?.();
-                        }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger-700 transition hover:bg-danger-100/40"
-                      >
-                        <Trash2 size={14} />
-                        Remover
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-            {isFormMode && (
-              <>
-                <Button size="sm" variant="secondary" onClick={closeWithAnim} disabled={submitting}>
-                  Cancelar
-                </Button>
-                <Button size="sm" variant="primary" loading={submitting} onClick={handleSubmit}>
-                  {submitting ? submittingLabel : submitLabel}
-                </Button>
-              </>
+            <Button size="sm" variant="secondary" onClick={closeWithAnim} disabled={submitting}>
+              Cancelar
+            </Button>
+            <Button size="sm" variant="primary" loading={submitting} onClick={handleSubmit}>
+              {submitting ? submittingLabel : submitLabel}
+            </Button>
+            {canRemove && (
+              <div className="relative" data-menu-anchor>
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-label="Mais opções"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className="flex h-9 w-9 items-center justify-center rounded-md text-neutral-600 transition hover:bg-neutral-100 active:scale-95"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
+                {menuOpen && (
+                  <div className="maestro-fade-in absolute right-0 top-11 z-20 w-44 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-0 shadow-lg">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onRequestRemove?.();
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-danger-700 transition hover:bg-danger-100/40"
+                    >
+                      <Trash2 size={14} />
+                      Remover
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <div key={`pane-${mode}-${person?.id ?? 'new'}`} className={paneClass}>
-            {mode === 'view' && person && <PersonDetail person={person} />}
-            {(mode === 'edit' || mode === 'create' || mode === 'edit-draft') && (
-              <PersonForm
-                initial={mode === 'edit' ? person : initialForm}
-                onSubmit={onSubmit}
-                registerSubmit={(fn) => {
-                  submitFnRef.current = fn;
-                }}
-                onDirtyChange={setDirty}
-              />
-            )}
+            <PersonForm
+              initial={mode === 'edit' ? person : initialForm}
+              onSubmit={onSubmit}
+              registerSubmit={(fn) => {
+                submitFnRef.current = fn;
+              }}
+              onDirtyChange={setDirty}
+            />
           </div>
         </div>
       </aside>

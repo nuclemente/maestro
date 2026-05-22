@@ -15,7 +15,7 @@ interface Props {
 
 export default function DraftCard({ draft, confirming, cancelling, onEdit, onConfirm, onCancel }: Props) {
   return (
-    <article className="maestro-fade-in flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-neutral-0 p-5 shadow-sm">
+    <article className="maestro-fade-in flex flex-col gap-4 rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-sm">
       <header className="flex items-start gap-4">
         <InitialsAvatar name={draft.name} relationship={draft.relationship} size={48} />
         <div className="min-w-0 flex-1">

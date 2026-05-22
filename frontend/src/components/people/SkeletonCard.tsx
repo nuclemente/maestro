@@ -6,7 +6,7 @@ export default function SkeletonCard() {
   return (
     <div
       aria-hidden
-      className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-0 p-4 shadow-sm"
+      className="relative overflow-hidden rounded-lg border border-neutral-200 bg-neutral-0 p-4 shadow-sm"
     >
       <div className="flex items-start gap-3">
         <div className="h-10 w-10 rounded-full bg-neutral-100" />

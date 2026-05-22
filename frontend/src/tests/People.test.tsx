@@ -46,7 +46,7 @@ describe('People page', () => {
     expect(screen.getByText('Senior SWE')).toBeInTheDocument();
   });
 
-  it('opens the drawer on card click and shows the detail', async () => {
+  it('opens the drawer on card click with editable form prefilled', async () => {
     vi.spyOn(global, 'fetch').mockImplementation(async (input) => {
       const url = String(input);
       if (url.includes('/people/drafts')) return mockJson([]);
@@ -62,8 +62,9 @@ describe('People page', () => {
 
     fireEvent.click(await screen.findByText('Alice Lima'));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('alice@example.com')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Alice Lima')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('alice@example.com')).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /salvar/i }).length).toBeGreaterThan(0);
   });
 
   it('shows empty state when there are no people', async () => {

@@ -28,7 +28,7 @@ const PersonCard = forwardRef<HTMLButtonElement, Props>(function PersonCard(
       onClick={() => onClick(person)}
       aria-pressed={selected}
       className={[
-        'group relative flex w-full flex-col gap-3 rounded-2xl border bg-neutral-0 p-4 text-left shadow-sm',
+        'group relative flex w-full flex-col gap-3 rounded-lg border bg-neutral-0 p-4 text-left shadow-sm',
         'transition-[transform,box-shadow,border-color] duration-200 ease-out',
         'hover:-translate-y-0.5 hover:shadow-md',
         'active:scale-[0.99] active:duration-100',

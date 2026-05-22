@@ -16,9 +16,8 @@ import type { Person, PersonInput, RelationshipType } from '../types/person';
 
 type DrawerState =
   | { mode: 'closed' }
-  | { mode: 'view'; person: Person; previous?: { mode: 'view'; person: Person } }
-  | { mode: 'edit'; person: Person; previous?: { mode: 'view'; person: Person } }
-  | { mode: 'create'; previous?: { mode: 'view'; person: Person } };
+  | { mode: 'edit'; person: Person }
+  | { mode: 'create' };
 
 export default function People() {
   const [filter, setFilter] = useState<RelationshipType | null>(null);
@@ -61,31 +60,14 @@ export default function People() {
     return () => window.removeEventListener('keydown', onKey);
   }, [drawer.mode]);
 
-  const selectedId = drawer.mode === 'view' || drawer.mode === 'edit' ? drawer.person.id : null;
+  const selectedId = drawer.mode === 'edit' ? drawer.person.id : null;
 
   function openCreate() {
-    setDrawer((prev) =>
-      prev.mode === 'view' ? { mode: 'create', previous: prev } : { mode: 'create' },
-    );
+    setDrawer({ mode: 'create' });
   }
 
-  function openView(person: Person) {
-    setDrawer({ mode: 'view', person });
-  }
-
-  function requestEdit() {
-    if (drawer.mode !== 'view') return;
-    setDrawer({ mode: 'edit', person: drawer.person, previous: drawer });
-  }
-
-  function goBack() {
-    if (drawer.mode === 'edit') {
-      setDrawer({ mode: 'view', person: drawer.person });
-    } else if (drawer.mode === 'create' && drawer.previous) {
-      setDrawer(drawer.previous);
-    } else {
-      setDrawer({ mode: 'closed' });
-    }
+  function openEdit(person: Person) {
+    setDrawer({ mode: 'edit', person });
   }
 
   async function handleSubmit(input: PersonInput) {
@@ -94,11 +76,11 @@ export default function People() {
         const created = await create(input);
         toast.success(`${created.name} cadastrada`);
         notifyDraftsChanged();
-        setDrawer({ mode: 'view', person: created });
+        setDrawer({ mode: 'edit', person: created });
       } else if (drawer.mode === 'edit') {
         const updated = await update(drawer.person.id, input);
         toast.success('Cadastro atualizado');
-        setDrawer({ mode: 'view', person: updated });
+        setDrawer({ mode: 'edit', person: updated });
       }
     } catch (err) {
       toast.error((err as Error).message);
@@ -107,7 +89,7 @@ export default function People() {
   }
 
   function requestRemove() {
-    if (drawer.mode === 'view') setRemoveTarget(drawer.person);
+    if (drawer.mode === 'edit') setRemoveTarget(drawer.person);
   }
 
   async function confirmRemove() {
@@ -219,18 +201,15 @@ export default function People() {
           people={people}
           selectedId={selectedId}
           loading={loading}
-          onSelect={openView}
+          onSelect={openEdit}
         />
       )}
 
       <PersonDrawer
         open={hasDrawer}
-        mode={drawer.mode === 'closed' ? 'view' : (drawer.mode as DrawerMode)}
-        person={drawer.mode === 'view' || drawer.mode === 'edit' ? drawer.person : null}
-        hasHistory={(drawer.mode === 'create' || drawer.mode === 'edit') && Boolean((drawer as { previous?: unknown }).previous)}
+        mode={drawer.mode === 'closed' ? 'edit' : (drawer.mode as DrawerMode)}
+        person={drawer.mode === 'edit' ? drawer.person : null}
         onClose={() => setDrawer({ mode: 'closed' })}
-        onBack={goBack}
-        onRequestEdit={requestEdit}
         onRequestRemove={requestRemove}
         onSubmit={handleSubmit}
       />
