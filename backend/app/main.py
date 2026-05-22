@@ -11,7 +11,7 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.logging import configure_logging, get_logger, set_correlation_id
-from app.routers import health
+from app.routers import health, people
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ def create_app() -> FastAPI:
         return response
 
     app.include_router(health.router, prefix="")
+    app.include_router(people.router)
     return app
 
 

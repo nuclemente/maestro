@@ -43,3 +43,5 @@ config.yaml
 MEMORY.md
 ARCHITECTURE.md
 CLAUDE.md
+features/
+SPEC.md

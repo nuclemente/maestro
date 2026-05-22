@@ -18,8 +18,19 @@ import shlex
 import sys
 from typing import Any
 
-#: Comandos suportados nesta base. Features adicionam novos comandos aqui.
-COMMANDS: tuple[str, ...] = ("ping", "help")
+#: Comandos suportados. Features adicionam novos comandos aqui.
+COMMANDS: tuple[str, ...] = (
+    "ping",
+    "help",
+    # Feature: cadastro de pessoas de interesse.
+    "people",
+    "add-person",
+    "show-person",
+    "update-person",
+    "discover-person",
+    "confirm-person",
+    "cancel-person",
+)
 
 
 def is_command(text: str) -> bool:

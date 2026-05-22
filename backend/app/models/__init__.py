@@ -9,4 +9,7 @@ class Base(DeclarativeBase):
     pass
 
 
+# Importações para o Alembic descobrir os modelos via `Base.metadata`.
+from app.models import person  # noqa: E402, F401
+
 __all__ = ["Base"]

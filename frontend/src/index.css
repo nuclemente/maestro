@@ -1,4 +1,5 @@
 @import './theme/fonts.css';
+@import './theme/animations.css';
 
 @tailwind base;
 @tailwind components;

@@ -90,7 +90,17 @@ def test_classify_empty_colon_only() -> None:
 
 def test_registered_commands_match_skill_md() -> None:
     """COMMANDS é a fonte de verdade — SKILL.md deve documentar este conjunto."""
-    assert COMMANDS == ("ping", "help")
+    assert COMMANDS == (
+        "ping",
+        "help",
+        "people",
+        "add-person",
+        "show-person",
+        "update-person",
+        "discover-person",
+        "confirm-person",
+        "cancel-person",
+    )
 
 
 def test_main_writes_json_to_stdout(capsys) -> None:

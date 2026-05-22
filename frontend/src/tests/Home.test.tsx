@@ -42,17 +42,22 @@ describe('Home page', () => {
   });
 
   it('calls the API and shows JSON on successful health ping', async () => {
-    const fetchSpy = vi.spyOn(global, 'fetch').mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          status: 'ok',
-          service: 'maestro-backend',
-          env: 'test',
-          timestamp: '2026-05-21T00:00:00Z',
-        }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } },
-      ),
-    );
+    const fetchSpy = vi.spyOn(global, 'fetch').mockImplementation(async (input) => {
+      const url = String(input);
+      if (url.includes('/health')) {
+        return new Response(
+          JSON.stringify({
+            status: 'ok',
+            service: 'maestro-backend',
+            env: 'test',
+            timestamp: '2026-05-21T00:00:00Z',
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      // Outras chamadas (drafts pelo sidebar etc.) — devolvem array vazio.
+      return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } });
+    });
 
     render(
       <MemoryRouter>

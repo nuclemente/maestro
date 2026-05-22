@@ -61,11 +61,18 @@ Se `channel_id` ausente, use o valor de `MEMORY.md` (bloco `slack`). Se
 
 4. **Despachar o comando:**
 
-   | Comando        | Ação                                                                                  |
-   | -------------- | ------------------------------------------------------------------------------------- |
-   | `:ping`        | Roda `python -m scripts.backend_ping` e responde com o status do backend.             |
-   | `:help`        | Lista os comandos disponíveis (apenas os daqui — ainda não há features).              |
-   | (desconhecido) | Responde no canal: `❓ comando não reconhecido: \`<cmd>\``. Sugira `:help`.            |
+   | Comando             | Ação                                                                                                                                  |
+   | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+   | `:ping`             | Roda `python -m scripts.backend_ping` e responde com o status do backend.                                                              |
+   | `:help`             | Lista os comandos disponíveis.                                                                                                         |
+   | `:people [tipo]`    | Despacha para a skill `people-list` com `{ "relationship": "<tipo|null>" }` e posta a lista no thread.                                  |
+   | `:add-person <kv>`  | Despacha para `people-add`. Args no formato `key=value` (ex.: `name="Alice" email=a@x.com relationship=peer`). Parse via `shlex`/`dict`.|
+   | `:show-person <ref>`| Despacha para `people-show` com `{ "id": "<ref>" }` se `<ref>` é UUID, senão `{ "email": "<ref>" }`.                                    |
+   | `:update-person …`  | Despacha para `people-update`. Formato: `id=<uuid> field=value field=value`.                                                            |
+   | `:discover-person <nome|email>` | Aciona o agent `people` em modo `discover`. O agent posta a proposta com `draft_id` no canal.                              |
+   | `:confirm-person <draft_id>`    | Despacha para `people-confirm` e posta confirmação no thread.                                                              |
+   | `:cancel-person <draft_id>`     | Despacha para `people-cancel` e posta confirmação no thread.                                                               |
+   | (desconhecido)      | Responde no canal: `❓ comando não reconhecido: \`<cmd>\``. Sugira `:help`.                                                              |
 
    Em todos os casos, responder no **mesmo thread** da mensagem original
    via `mcp__plugin_slack_slack__slack_send_message` (use `thread_ts = message.ts`).
@@ -85,6 +92,13 @@ Se `channel_id` ausente, use o valor de `MEMORY.md` (bloco `slack`). Se
    - `:ping` ok → `🎼 Maestro online — \`<service>\` em \`<env>\` (ts=\`<timestamp>\`)`
    - `:ping` falha → `⚠️ Maestro indisponível: <error>`
    - `:help` → lista plana dos comandos registrados.
+   - `:people …` / `:add-person …` / `:show-person …` / `:update-person …` →
+     repassa para a skill `people-*` correspondente (via `skill_runner`); a
+     resposta do bloco `data.formatted` (quando existir) entra como reply.
+   - `:discover-person …` → aciona o agent `people` (modo `discover`); o agent
+     mesmo posta a proposta com `draft_id` no thread.
+   - `:confirm-person …` / `:cancel-person …` → repassa para `people-confirm` /
+     `people-cancel` e posta confirmação curta.
 
 7. **Encerrar** com bloco JSON delimitado:
 
