@@ -72,6 +72,12 @@ Se `channel_id` ausente, use o valor de `MEMORY.md` (bloco `slack`). Se
    | `:discover-person <nome|email>` | Aciona o agent `people` em modo `discover`. O agent posta a proposta com `draft_id` no canal.                              |
    | `:confirm-person <draft_id>`    | Despacha para `people-confirm` e posta confirmação no thread.                                                              |
    | `:cancel-person <draft_id>`     | Despacha para `people-cancel` e posta confirmação no thread.                                                               |
+   | `:oneonone <ref>`               | Despacha para a skill `oneonone-show` com `{ "ref": "<id|email>" }`.                                                       |
+   | `:collect-topics <ref> [--force]` | Despacha para `oneonone-collect-topics` com `{ "ref": "<...>", "force": true|false }`.                                   |
+   | `:close-collection <ref>`       | Despacha para `oneonone-close-collection` com `{ "ref": "<...>" }`.                                                        |
+   | `:add-topic <ref> <texto…>`     | Despacha para `oneonone-add-topic` com `{ "ref": "<...>", "title": "<texto>" }` (texto concatena tokens restantes).         |
+   | `:prepare <ref>`                | Despacha para `oneonone-prepare` com `{ "ref": "<...>" }`. A skill aciona o agent `oneonone` em modo `enrich`.              |
+   | `:new-session <ref> [data]`     | Despacha para `oneonone-new-session` com `{ "ref": "<...>", "scheduled_at": "<data|null>" }`. Data aceita `YYYY-MM-DD HH:MM`. |
    | (desconhecido)      | Responde no canal: `❓ comando não reconhecido: \`<cmd>\``. Sugira `:help`.                                                              |
 
    Em todos os casos, responder no **mesmo thread** da mensagem original

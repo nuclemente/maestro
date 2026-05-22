@@ -61,7 +61,10 @@ def _parse_skill_md(skill_md: Path) -> tuple[dict, str]:
 def _extract_json_block(stdout: str) -> dict:
     match = _JSON_BLOCK_RE.search(stdout)
     if not match:
-        raise SkillContractError("Resposta da skill não contém bloco ```json```")
+        preview = (stdout or "")[:500]
+        raise SkillContractError(
+            f"Resposta da skill não contém bloco ```json``` (stdout[:500]={preview!r})"
+        )
     try:
         return json.loads(match.group(1))
     except json.JSONDecodeError as exc:

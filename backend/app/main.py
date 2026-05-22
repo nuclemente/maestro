@@ -11,7 +11,7 @@ from starlette.responses import Response
 
 from app.config import get_settings
 from app.logging import configure_logging, get_logger, set_correlation_id
-from app.routers import health, people
+from app.routers import health, oneonone, people, skills
 
 
 @asynccontextmanager
@@ -56,6 +56,9 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router, prefix="")
     app.include_router(people.router)
+    app.include_router(oneonone.track_router)
+    app.include_router(oneonone.core_router)
+    app.include_router(skills.router)
     return app
 
 

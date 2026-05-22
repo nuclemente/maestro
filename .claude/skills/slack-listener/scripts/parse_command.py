@@ -30,6 +30,13 @@ COMMANDS: tuple[str, ...] = (
     "discover-person",
     "confirm-person",
     "cancel-person",
+    # Feature: ecossistema de 1:1.
+    "oneonone",
+    "collect-topics",
+    "close-collection",
+    "add-topic",
+    "prepare",
+    "new-session",
 )
 
 

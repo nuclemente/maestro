@@ -100,7 +100,25 @@ def test_registered_commands_match_skill_md() -> None:
         "discover-person",
         "confirm-person",
         "cancel-person",
+        "oneonone",
+        "collect-topics",
+        "close-collection",
+        "add-topic",
+        "prepare",
+        "new-session",
     )
+
+
+def test_oneonone_commands_classified() -> None:
+    assert classify({"ts": "1.0", "text": ":oneonone ana@x.com"})["known"] is True
+    assert classify({"ts": "2.0", "text": ":collect-topics ana@x.com --force"})["args"] == [
+        "ana@x.com",
+        "--force",
+    ]
+    assert classify({"ts": "3.0", "text": ':add-topic ana "Carreira no Q3"'})["args"] == [
+        "ana",
+        "Carreira no Q3",
+    ]
 
 
 def test_main_writes_json_to_stdout(capsys) -> None:

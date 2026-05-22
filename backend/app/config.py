@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     skills_dir: str
     agents_dir: str
 
+    # Feature: ecossistema de 1:1
+    em_email: str = ""
+    oneonone_enrich_top_n: int = 3
+    oneonone_transcript_chunk_tokens: int = 8000
+
     def resolved_db_url(self) -> str:
         if self.db_url:
             return self.db_url

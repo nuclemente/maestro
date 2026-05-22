@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, MoreHorizontal, Trash2, X } from 'lucide-react';
 import Button from '../ui/Button';
 import PersonForm from './PersonForm';
+import OneOnOneTab from '../oneonone/OneOnOneTab';
 import type { Person, PersonInput } from '../../types/person';
+
+type DrawerTab = 'profile' | 'oneonone';
 
 export type DrawerMode = 'edit' | 'create' | 'edit-draft';
 
@@ -42,6 +45,7 @@ export default function PersonDrawer({
   const [menuOpen, setMenuOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [tab, setTab] = useState<DrawerTab>('profile');
   const submitFnRef = useRef<(() => Promise<boolean>) | null>(null);
   const previousModeRef = useRef<DrawerMode>(mode);
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -64,6 +68,11 @@ export default function PersonDrawer({
     }, 140);
     return () => clearTimeout(t);
   }, [mode, open]);
+
+  // Reset tab quando troca de pessoa/modo.
+  useEffect(() => {
+    setTab('profile');
+  }, [person?.id, mode]);
 
   const closeWithAnim = useCallback(() => {
     if (closing) return;
@@ -122,6 +131,8 @@ export default function PersonDrawer({
   const submitLabel = mode === 'create' ? 'Cadastrar' : 'Salvar';
   const submittingLabel = mode === 'create' ? 'Cadastrando…' : 'Salvando…';
   const canRemove = mode === 'edit' && Boolean(person) && Boolean(onRequestRemove);
+  const canShowOneOnOne = mode === 'edit' && !!person?.id;
+  const onProfileTab = tab === 'profile';
 
   return (
     <>
@@ -163,12 +174,16 @@ export default function PersonDrawer({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button size="sm" variant="secondary" onClick={closeWithAnim} disabled={submitting}>
-              Cancelar
-            </Button>
-            <Button size="sm" variant="primary" loading={submitting} onClick={handleSubmit}>
-              {submitting ? submittingLabel : submitLabel}
-            </Button>
+            {onProfileTab && (
+              <>
+                <Button size="sm" variant="secondary" onClick={closeWithAnim} disabled={submitting}>
+                  Cancelar
+                </Button>
+                <Button size="sm" variant="primary" loading={submitting} onClick={handleSubmit}>
+                  {submitting ? submittingLabel : submitLabel}
+                </Button>
+              </>
+            )}
             {canRemove && (
               <div className="relative" data-menu-anchor>
                 <button
@@ -201,16 +216,51 @@ export default function PersonDrawer({
           </div>
         </header>
 
+        {canShowOneOnOne && (
+          <nav
+            className="flex shrink-0 gap-1 border-b border-neutral-100 bg-neutral-0 px-6"
+            role="tablist"
+            aria-label="Seções da pessoa"
+          >
+            {([
+              { id: 'profile' as const, label: 'Perfil' },
+              { id: 'oneonone' as const, label: '1:1s' },
+            ]).map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.id)}
+                  className={[
+                    'border-b-2 px-3 py-2 text-sm font-medium transition',
+                    active
+                      ? 'border-primary-600 text-primary-800'
+                      : 'border-transparent text-neutral-600 hover:text-neutral-900',
+                  ].join(' ')}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </nav>
+        )}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <div key={`pane-${mode}-${person?.id ?? 'new'}`} className={paneClass}>
-            <PersonForm
-              initial={mode === 'edit' ? person : initialForm}
-              onSubmit={onSubmit}
-              registerSubmit={(fn) => {
-                submitFnRef.current = fn;
-              }}
-              onDirtyChange={setDirty}
-            />
+          <div key={`pane-${mode}-${person?.id ?? 'new'}-${tab}`} className={paneClass}>
+            {onProfileTab ? (
+              <PersonForm
+                initial={mode === 'edit' ? person : initialForm}
+                onSubmit={onSubmit}
+                registerSubmit={(fn) => {
+                  submitFnRef.current = fn;
+                }}
+                onDirtyChange={setDirty}
+              />
+            ) : person ? (
+              <OneOnOneTab person={person} />
+            ) : null}
           </div>
         </div>
       </aside>
